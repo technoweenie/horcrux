@@ -10,6 +10,20 @@ module Horcrux
       @client = client
     end
 
+    def get_all(*keys)
+      keys.map { |k| get(k) }
+    end
+
+    def set_all(values)
+      values.each do |key, value|
+        set key, value
+      end
+    end
+
+    def delete_all(*keys)
+      keys.each { |k| delete(k) }
+    end
+
     def key?(key)
       !get(key).nil?
     end
