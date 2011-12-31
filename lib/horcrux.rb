@@ -21,7 +21,7 @@ module Horcrux
     end
 
     def delete_all(*keys)
-      keys.each { |k| delete(k) }
+      keys.map { |k| delete(k) }
     end
 
     def key?(key)
@@ -45,7 +45,7 @@ module Horcrux
     end
 
     def delete(key)
-      client.delete(key)
+      !client.delete(key).nil?
     end
   end
 end

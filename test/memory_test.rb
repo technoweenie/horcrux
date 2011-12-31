@@ -16,8 +16,8 @@ module Horcrux
     def test_deletes_values
       assert_equal '1', @adapter.set('a', '1')
       assert_equal '1', @adapter.get('a')
-      assert_equal '1', @adapter.delete('a')
-      assert_nil @adapter.delete('a')
+      assert_equal true, @adapter.delete('a')
+      assert_equal false, @adapter.delete('a')
     end
 
     def test_fetch_sets_fallback
@@ -55,7 +55,7 @@ module Horcrux
       assert_equal '1', @adapter.get('a')
       assert_equal '2', @adapter.get('b')
 
-      @adapter.delete_all('a', 'b', 'c')
+      assert_equal [true, true, false], @adapter.delete_all('a', 'b', 'c')
 
       assert_nil @adapter.get('a')
       assert_nil @adapter.get('b')
