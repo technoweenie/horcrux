@@ -5,6 +5,53 @@ fragment of his or her soul for the purpose of attaining immortality.
 
 The Horcrux ruby gem is an abstract key/value store adapter library.  
 
+Horcrux adapters are shims around key/value systems.  They need to define at
+least these three methods:
+
+    def get(key)
+      client[key]
+    end
+
+    def set(key, value)
+      client[key] = value
+      true
+    end
+
+    def delete(key)
+      client.delete(key) ? true : false
+    end
+
+See Horcrux::Memory for a simple example.
+
+They should also include the Horcrux::Methods module.  If the underlying
+key/value system can perform some operations more efficiently, they can 
+be overridden:
+
+    # using a redis client
+    def set_all(*keys)
+      args = keys.to_a
+      args.flatten!
+      client.mset *args
+      Array.new(keys.size, true) # redis set always succeeds
+    end
+
+Adapters can also choose a Serializer object.  A Serializer is any object that
+responds to #pack and #unpack.  Here's what a simple JSON one might look like:
+
+    module YajlSerializer
+      def self.pack(value)
+        Yajl.dump(value)
+      end
+
+      def self.unpack(str)
+        Yajl.load(str, :symbolize_keys => true)
+      end
+    end
+
+You can then pass this in while creating your Horcrux adapter:
+
+    @adapter = Horcrux::Memory.new({}, YajlSerializer)
+
 ## ToyStore Adapter
 
 A lot of these ideas came from [the Adapter gem][adapter].  It ties into a rad
