@@ -17,18 +17,6 @@ module Horcrux
     def fetch(key)
       get(key) || set(key, yield)
     end
-
-    def key_for(key)
-      key.to_s
-    end
-
-    def encode(value)
-      value.to_s
-    end
-
-    def decode(value)
-      value
-    end
   end
 
   class Memory
