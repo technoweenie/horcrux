@@ -36,6 +36,10 @@ module Horcrux
   class Memory
     include Methods
 
+    def key?(key)
+      client.key? key
+    end
+
     def get(key)
       client[key]
     end
