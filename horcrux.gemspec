@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   ## the sub! line in the Rakefile
   s.name              = 'horcrux'
   s.version           = '0.0.1'
-  s.date              = '2011-12-30'
+  s.date              = '2012-01-01'
   s.rubyforge_project = 'horcrux'
 
   ## Make sure your summary is short. The description may be as long
@@ -40,7 +40,12 @@ Gem::Specification.new do |s|
   ## THE MANIFEST COMMENTS, they are used as delimiters by the task.
   # = MANIFEST =
   s.files = %w[
-
+    LICENSE.md
+    README.md
+    Rakefile
+    horcrux.gemspec
+    lib/horcrux.rb
+    test/memory_test.rb
   ]
   # = MANIFEST =
 
