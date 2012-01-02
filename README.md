@@ -40,8 +40,8 @@ end
 ```
 
 Adapters can also choose a Serializer object.  A Serializer is any object that
-responds to #dump and #load.  Here's what a simple MessagePack one might look
-like:
+responds to #dump and #load.  This means Marshal and Yajl can be passed in
+directly. Here's what a custom MessagePack serializer might look like:
 
 ```ruby
 module MessagePackSerializer
@@ -58,7 +58,7 @@ end
 You can then pass this in while creating your Horcrux adapter:
 
 ```ruby
-@adapter = Horcrux::Memory.new({}, YajlSerializer)
+@adapter = Horcrux::Memory.new({}, MessagePackSerializer)
 ```
 
 ## ToyStore Adapter
@@ -69,6 +69,7 @@ A lot of these ideas came from [the Adapter gem][adapter].  It ties into a rad
 Horcrux differs in a few areas:
 
 * Focus on batch get/set/delete operations.
+* Doesn't mimic the Hash API.
 * Serializers are a separate object.  BYOS.
 * Boring test/unit tests.  
 * Ruby 1.8.7 and Ruby 1.9.x compatibility.
