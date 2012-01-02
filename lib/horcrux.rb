@@ -102,22 +102,22 @@ module Horcrux
 
   # Passes values through Horcrux untouched.
   module NullSerializer
-    def self.pack(value)
+    def self.dump(value)
       value
     end
 
-    def self.unpack(str)
+    def self.load(str)
       str
     end
   end
 
   # Ensures that Horcrux values are turned to strings.
   module StringSerializer
-    def self.pack(value)
+    def self.dump(value)
       value.to_s
     end
 
-    def self.unpack(str)
+    def self.load(str)
       str
     end
   end
@@ -148,7 +148,7 @@ module Horcrux
     #
     # Returns the Object value.
     def get(key)
-      serializer.unpack client[key_for(key)]
+      serializer.load client[key_for(key)]
     end
 
     # Public: Sets the value for the given key.
@@ -158,7 +158,7 @@ module Horcrux
     #
     # Returns true if the operation succeeded, or false.
     def set(key, value)
-      client[key_for(key)] = serializer.pack(value)
+      client[key_for(key)] = serializer.dump(value)
       true
     end
 
