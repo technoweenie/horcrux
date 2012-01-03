@@ -42,6 +42,55 @@ module Horcrux
         end
       end
 
+      def build_bool_attr(keys, is_readonly)
+        attr_reader *keys
+
+        build_attrs(keys, is_readonly) do |key_s|
+          ivar_key = "@#{key_s}"
+
+          define_method "#{key_s}?" do
+            !!instance_variable_get(ivar_key)
+          end
+
+          next if is_readonly
+
+          define_method "#{key_s}=" do |value|
+            instance_variable_set ivar_key, case value
+              when Fixnum  then value > 0
+              when /t|f/i  then value =~ /t/i
+              else !!value
+            end
+          end
+        end
+      end
+
+      def build_array_attr(keys, is_readonly)
+        build_class_attr(Array, keys, is_readonly)
+      end
+
+      def build_hash_attr(keys, is_readonly)
+        build_class_attr(Hash, keys, is_readonly)
+      end
+
+      def build_class_attr(klass, keys, is_readonly)
+        build_attrs(keys, is_readonly) do |key_s|
+          ivar_key = "@#{key_s}"
+          define_method key_s do
+            instance_variable_get(ivar_key) ||
+              instance_variable_set(ivar_key, klass.new)
+          end
+
+          next if is_readonly
+
+          define_method "#{key_s}=" do |value|
+            unless value.is_a?(klass)
+              raise TypeError, "#{key_s} should be a #{klass}: #{value.inspect}"
+            end
+            instance_variable_set(ivar_key, value)
+          end
+        end
+      end
+
       def build_attrs(keys, is_readonly)
         keys.each do |key|
           key_s = key.to_s
@@ -77,6 +126,7 @@ module Horcrux
       self
     end
 
+    # Public
     def each_attr(writable_only = false)
       attr_method = writable_only ? :writable_attributes : :attributes
       self.class.send(attr_method).each do |key|
@@ -87,6 +137,7 @@ module Horcrux
       self
     end
 
+    # Public
     def ==(other)
       default_attr = self.class.default_attribute
       other.class == self.class && other.send(default_attr) == send(default_attr)
