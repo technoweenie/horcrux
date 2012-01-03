@@ -33,6 +33,7 @@ module Horcrux
         assert_equal 946684800, loaded['c']
       end
     rescue LoadError
+      puts "Skipping MessagePack test.  run 'gem install msgpack'"
     end
   end
 end
