@@ -1,3 +1,4 @@
+require File.expand_path('../../../horcrux', __FILE__)
 require 'zlib'
 require 'stringio'
 
