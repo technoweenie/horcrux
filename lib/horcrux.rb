@@ -1,3 +1,6 @@
+require 'zlib'
+require 'stringio'
+
 # See the README.md
 module Horcrux
   VERSION = "0.0.1"
@@ -119,6 +122,29 @@ module Horcrux
 
     def self.load(str)
       str
+    end
+  end
+
+  class GzipSerializer
+    def initialize(serializer)
+      @serializer = serializer
+    end
+
+    def dump(value)
+      s = StringIO.new
+      z = Zlib::GzipWriter.new(s)
+      z.write @serializer.dump(value)
+      s.string
+    ensure
+      z.close if z
+    end
+
+    def load(value)
+      s = StringIO.new(value)
+      z = Zlib::GzipReader.new(s)
+      @serializer.load(z.read)
+    ensure
+      z.close if z
     end
   end
 

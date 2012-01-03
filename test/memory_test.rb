@@ -1,5 +1,4 @@
-require 'test/unit'
-require File.expand_path('../../lib/horcrux', __FILE__)
+require File.expand_path('../helper', __FILE__)
 
 module Horcrux
   class MemoryTest < Test::Unit::TestCase
@@ -62,3 +61,4 @@ module Horcrux
     end
   end
 end
+
