@@ -16,12 +16,22 @@ module Horcrux
     module ClassMethods
       # Public
       def attr(type, *keys)
-        send "build_#{type}_attr", keys, false
+        method = "build_#{type}_attr"
+        if respond_to?(method)
+          send method, keys, false
+        else
+          raise TypeError, "Type #{type.inspect} not recognized."
+        end
       end
 
       # Public
       def readonly(type, *keys)
-        send "build_#{type}_attr", keys, true
+        method = "build_#{type}_attr"
+        if respond_to?(method)
+          send method, keys, true
+        else
+          raise TypeError, "Type #{type.inspect} not recognized."
+        end
       end
 
       # Public
@@ -33,8 +43,6 @@ module Horcrux
         attr_reader *keys
 
         build_attrs(keys, is_readonly) do |key_s|
-          next if is_readonly
-
           ivar_key = "@#{key_s}"
           define_method "#{key_s}=" do |value|
             instance_variable_set ivar_key, value
@@ -52,12 +60,10 @@ module Horcrux
             !!instance_variable_get(ivar_key)
           end
 
-          next if is_readonly
-
           define_method "#{key_s}=" do |value|
             instance_variable_set ivar_key, case value
               when Fixnum  then value > 0
-              when /t|f/i  then value =~ /t/i
+              when /t|f/i  then value =~ /t/i ? true : false
               else !!value
             end
           end
@@ -72,6 +78,20 @@ module Horcrux
         build_class_attr(Hash, keys, is_readonly)
       end
 
+      def build_time_attr(keys, is_readonly)
+        attr_reader *keys
+
+        build_attrs(keys, is_readonly) do |key_s|
+          ivar_key = "@#{key_s}"
+          define_method "#{key_s}=" do |value|
+            instance_variable_set ivar_key,
+              value.respond_to?(:utc) ? 
+                value :
+                Time.at(value.to_i).utc
+          end
+        end
+      end
+
       def build_class_attr(klass, keys, is_readonly)
         build_attrs(keys, is_readonly) do |key_s|
           ivar_key = "@#{key_s}"
@@ -79,8 +99,6 @@ module Horcrux
             instance_variable_get(ivar_key) ||
               instance_variable_set(ivar_key, klass.new)
           end
-
-          next if is_readonly
 
           define_method "#{key_s}=" do |value|
             unless value.is_a?(klass)
@@ -104,7 +122,7 @@ module Horcrux
 
     # Public
     def initialize(hash = {})
-      update_attrs(hash)
+      update_attrs(hash, all = true)
     end
 
     # Public: Updates multiple attributes.
@@ -112,15 +130,16 @@ module Horcrux
     # hash - A Hash containing valid attributes.
     #
     # Returns this Entity.
-    def update_attrs(hash)
-      attr = self.class.attributes
+    def update_attrs(hash, all = false)
+      attr = all ? self.class.attributes : self.class.writable_attributes
       hash.each do |key, value|
         key_s = key.to_s
+        
         if !attr.include?(key_s)
           raise ArgumentError, "Invalid property: #{key.inspect}"
         end
 
-        instance_variable_set "@#{key_s}", value
+        send "#{key_s}=", value
       end
 
       self

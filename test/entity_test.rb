@@ -7,11 +7,17 @@ module Horcrux
 
       attr :string, :name
       attr :bool, :admin
-
       attr :array, :roles
+      attr :time, :updated_at
 
       readonly :string, :type
       readonly :hash, :codes
+      readonly :time, :created_at
+      
+      def initialize(hash)
+        super(hash)
+        @created_at ||= Time.now.utc
+      end
 
       def type
         @type ||= 'default'
@@ -40,17 +46,32 @@ module Horcrux
       ent.roles = %w(c)
       assert_equal %w(c), ent.roles
 
-      assert_raises NoMethodError do
-        ent.type = 'troll'
+      assert_equal 2000, ent.created_at.year
+      assert_equal 2012, ent.updated_at.year
+
+      ent.updated_at = Time.utc 2010
+      assert_equal 2010, ent.updated_at.year
+
+      assert_raises ArgumentError do
+        ent.update_attrs :type => 'troll'
       end
 
-      assert_raises NoMethodError do
-        ent.codes = 'troll'
+      assert_raises ArgumentError do
+        ent.update_attrs :codes => 'troll'
+      end
+
+      assert_raises ArgumentError do
+        ent.update_attrs :created_at => Time.now
       end
 
       assert_raises TypeError do
         ent.roles = 1
       end
+    end
+
+    def test_initializes_with_default_value
+      ent = entity(:created_at => nil)
+      assert_equal Time.now.utc.year, ent.created_at.year
     end
 
     def test_dumps_entity_to_hash
@@ -94,7 +115,8 @@ module Horcrux
     end
 
     def entity_data(options = {})
-      hash = {:name => 'bob', :type => 'person', :admin => true,
+      hash = {:name => 'bob', :type => 'person', :admin => 't',
+        :created_at => Time.utc(2000), :updated_at => 1325619163,
         :roles => %w(a b), :codes => {'a' => 1, 'b' => 2}}
       options.each do |key, value|
         if value.nil?
