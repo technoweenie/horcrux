@@ -81,6 +81,8 @@ module Horcrux
       assert_equal true, hash[:admin]
       assert_equal %w(a b), hash[:roles]
       assert_equal({"a" => 1, "b" => 2}, hash[:codes])
+      assert_equal 2000, hash[:created_at].year
+      assert_equal 2012, hash[:updated_at].year
     end
 
     def test_tracks_attributes
@@ -89,14 +91,18 @@ module Horcrux
       assert Entity.attributes.include?('type')
       assert Entity.attributes.include?('roles')
       assert Entity.attributes.include?('codes')
+      assert Entity.attributes.include?('created_at')
+      assert Entity.attributes.include?('updated_at')
     end
 
     def test_tracks_writable_attributes
       assert Entity.writable_attributes.include?('name')
       assert Entity.writable_attributes.include?('admin')
       assert Entity.writable_attributes.include?('roles')
+      assert Entity.writable_attributes.include?('updated_at')
       assert !Entity.writable_attributes.include?('codes')
       assert !Entity.writable_attributes.include?('type')
+      assert !Entity.writable_attributes.include?('created_at')
     end
 
     def test_tracks_default_attribute
