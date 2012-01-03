@@ -19,6 +19,21 @@ module Horcrux
       assert zipped.size < data.size
       assert_equal data, gzip.load(zipped)
     end
+
+    begin
+      require File.expand_path("../../lib/horcrux/serializers/message_pack_serializer", __FILE__)
+
+      def test_msgpack_serializer
+        hash = {:a => 1, :b => {:a => 'a'}, :c => Time.utc(2000)}
+
+        data = MessagePackSerializer.dump(hash)
+        loaded = MessagePackSerializer.load(data)
+        assert_equal 1, loaded['a']
+        assert_equal({"a" => "a"}, loaded["b"])
+        assert_equal 946684800, loaded['c']
+      end
+    rescue LoadError
+    end
   end
 end
 

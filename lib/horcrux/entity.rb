@@ -1,5 +1,6 @@
 require File.expand_path('../../horcrux', __FILE__)
 require 'set'
+require 'time'
 
 module Horcrux
   module Entity
