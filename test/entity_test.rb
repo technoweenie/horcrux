@@ -64,6 +64,12 @@ module Horcrux
         ent.update_attrs :created_at => Time.now
       end
 
+      ent.roles = nil
+      assert_equal [], ent.roles
+      
+      ent.codes = nil
+      assert_equal({}, ent.codes)
+
       assert_raises TypeError do
         ent.roles = 1
       end

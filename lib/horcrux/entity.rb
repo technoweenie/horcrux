@@ -102,7 +102,7 @@ module Horcrux
           end
 
           define_method "#{key_s}=" do |value|
-            unless value.is_a?(klass)
+            unless value.nil? || value.is_a?(klass)
               raise TypeError, "#{key_s} should be a #{klass}: #{value.inspect}"
             end
             instance_variable_set(ivar_key, value)
