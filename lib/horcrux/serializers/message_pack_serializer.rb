@@ -1,4 +1,3 @@
-require File.expand_path('../../../horcrux', __FILE__)
 require 'msgpack'
 
 module Horcrux
