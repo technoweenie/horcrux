@@ -2,6 +2,9 @@ module Horcrux
   class Multiple
     include Methods
 
+    attr_reader :rescuable_exceptions
+    attr_reader :error_handlers
+
     # Sets up an Adapter using a collection of other adapters.  The first is
     # assumed to be the main, while the others are write-through caches.  This
     # is good for caching.
@@ -21,6 +24,13 @@ module Horcrux
 
       @main = adapters.shift
       @adapters = adapters
+      @error_handlers = []
+      @rescuable_exceptions = [StandardError]
+    end
+
+    def on_error(&block)
+      @error_handlers << block
+      nil
     end
 
     ## HORCRUX METHODS
@@ -89,8 +99,14 @@ module Horcrux
     # Returns the value of the method call.
     def call_adapter(adapter, method, *args)
       adapter.send(method, *args)
-    rescue err
-      $stderr.puts "Exception for #{adapter.inspect}##{method}: #{err}"
+    rescue Object => err
+      raise unless @rescuable_exceptions.any? { |klass| err.is_a?(klass) }
+
+      if @error_handlers.each do |handler|
+        handler.call err, :adapter => adapter, :method => method, :args => args
+      end.empty?
+        $stderr.puts "#{err.class} Exception for #{adapter.inspect}##{method}: #{err}"
+      end
     end
   end
 end

@@ -3,9 +3,9 @@ require File.expand_path('../memory_test', __FILE__)
 module Horcrux
   class MultipleTest < MemoryTest
     def setup
-      @main = Memory.new({})
-      @cache1 = Memory.new({})
-      @cache2 = Memory.new({})
+      @main = Memory.new(@main_hash = {})
+      @cache1 = Memory.new(@cache1_hash = {})
+      @cache2 = Memory.new(@cache2_hash = {})
       @adapter = Multiple.new @main, @cache1, @cache2
     end
 
@@ -65,6 +65,27 @@ module Horcrux
       assert !@cache1.key?('a')
       assert !@cache1.key?('a')
       assert !@adapter.key?('a')
+    end
+
+    def test_ignores_errors
+      called = false
+
+      @adapter.on_error do |err, obj|
+        called = true
+        assert_kind_of RuntimeError, err
+        assert_equal @cache1, obj[:adapter]
+        assert_equal :get, obj[:method]
+        assert_equal %w(a), obj[:args]
+      end
+
+      hash = @cache1_hash
+      def hash.[](*args) raise end
+
+      @cache1.set 'a', '1'
+      @cache2.set 'a', '2'
+
+      assert_equal '2', @adapter.get('a')
+      assert called
     end
   end
 end
