@@ -24,7 +24,48 @@ module Horcrux
 
       assert_equal '3', @adapter.get('a')
     end
+
+    def test_sets_to_all_caches
+      @adapter.set 'a', '5'
+
+      assert_equal '5', @main.get('a')
+      assert_equal '5', @cache1.get('a')
+      assert_equal '5', @cache2.get('a')
+    end
+
+    def test_sets_values_to_all_caches
+      @adapter.set_all 'a' => '5'
+
+      assert_equal '5', @main.get('a')
+      assert_equal '5', @cache1.get('a')
+      assert_equal '5', @cache2.get('a')
+    end
+
+    def test_deletes_from_all_caches
+      @main.set 'a', '1'
+      @cache1.set 'a', '1'
+      @cache2.set 'a', '1'
+
+      @adapter.delete 'a'
+
+      assert !@main.key?('a')
+      assert !@cache1.key?('a')
+      assert !@cache1.key?('a')
+      assert !@adapter.key?('a')
+    end
+
+    def test_deletes_keys_from_all_caches
+      @main.set 'a', '1'
+      @cache1.set 'a', '1'
+      @cache2.set 'a', '1'
+
+      @adapter.delete_all 'a'
+
+      assert !@main.key?('a')
+      assert !@cache1.key?('a')
+      assert !@cache1.key?('a')
+      assert !@adapter.key?('a')
+    end
   end
 end
-
 
