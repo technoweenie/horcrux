@@ -1,4 +1,4 @@
-require File.expand_path('../helper', __FILE__)
+require File.expand_path('../memory_test', __FILE__)
 
 module Horcrux
   class MultipleTest < MemoryTest
