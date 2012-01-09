@@ -67,6 +67,34 @@ module Horcrux
       assert !@adapter.key?('a')
     end
 
+    def test_calls_on_missing_callback
+      called = 0
+
+      @adapter.on_missing do |adapter, values|
+        called += 1
+        
+        case adapter
+        when @cache1
+          assert_equal 2, values.size
+          assert_equal '1', values['a']
+          assert_equal '3', values['c']
+        when @cache2
+          assert_equal 1, values.size
+          assert_equal '3', values['c']
+        else
+          fail "Bad adapter: #{adapter.inspect}"
+        end
+
+      end
+
+      @cache2.set 'a', '1'
+      @cache1.set 'b', '2'
+      @main.set 'c', '3'
+
+      assert_equal %w(1 2 3), @adapter.get_all('a', 'b', 'c')
+      assert_equal 2, called
+    end
+
     def test_ignores_errors
       called = false
 

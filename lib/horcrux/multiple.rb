@@ -3,7 +3,7 @@ module Horcrux
     include Methods
 
     attr_reader :rescuable_exceptions
-    attr_reader :error_handlers
+    attr_reader :error_handlers, :missing_handlers
 
     # Sets up an Adapter using a collection of other adapters.  The first is
     # assumed to be the main, while the others are write-through caches.  This
@@ -25,15 +25,63 @@ module Horcrux
       @main = adapters.shift
       @adapters = adapters
       @error_handlers = []
+      @missing_handlers = []
       @rescuable_exceptions = [StandardError]
     end
 
+    # Public: Adds the given block to the chain of handlers to call for a
+    # raised exception while accessing one of the adapters.
+    #
+    #     @adapter.on_error do |err, obj|
+    #       obj[:adapter]
+    #       obj[:method]
+    #       obj[:args]
+    #     end
+    #
+    # Returns nothing.
     def on_error(&block)
       @error_handlers << block
       nil
     end
 
+    # Public: Adds the given block to the chain of handlers to call when a 
+    # secondary adapter is missing one or more keys.
+    #
+    #     @adapter.on_missing do |adapter, values|
+    #       adapter.set_all(values)
+    #     end
+    #
+    # Returns nothing.
+    def on_missing(&block)
+      @missing_handlers << block
+      nil
+    end
+
     ## HORCRUX METHODS
+   
+    def get_all(*keys)
+      original = keys.dup
+      adapter_missing = {}
+      values = {}
+
+      @adapters.each do |adapter|
+        found, missing = get_from_adapter(adapter, keys)
+        values.update(found)
+
+        if !missing.empty?
+          adapter_missing[adapter] = missing
+        end
+
+        keys = missing
+      end
+
+      found, missing = get_from_adapter(@main, keys)
+      values.update(found)
+
+      call_missing_handlers(values, adapter_missing)
+
+      original.map { |key| values[key] }
+    end
 
     def key?(key)
       read_cache :key?, key
@@ -106,6 +154,51 @@ module Horcrux
         handler.call err, :adapter => adapter, :method => method, :args => args
       end.empty?
         $stderr.puts "#{err.class} Exception for #{adapter.inspect}##{method}: #{err}"
+      end
+    end
+
+    # Gets all keys from the adapter.
+    #
+    # adapter - A Horcrux adapter.
+    # keys    - Array of String keys to fetch.
+    #
+    # Returns an Array tuple with a Hash of found keys/values, and an Array of
+    # missing keys.
+    def get_from_adapter(adapter, keys)
+      missing = []
+      found = {}
+
+      adapter.get_all(*keys).each_with_index do |value, index|
+        key = keys[index]
+
+        if value
+          found[key] = value
+        else
+          missing << key
+        end
+      end unless keys.empty?
+
+      [found, missing]
+    end
+
+    # Call the on_missing callbacks for the handlers that were missing keys.
+    # This gives you a chance to set those values in the secondary adapters.
+    #
+    # values  - A Hash of all of the found keys => values.
+    # missing - A Hash of Adapter => Array of missing keys.
+    #
+    # Returns nothing.
+    def call_missing_handlers(values, missing)
+      return if @missing_handlers.empty?
+      missing.each do |adapter, keys|
+        missing_values = {}
+        keys.each do |key|
+          missing_values[key] = values[key]
+        end
+
+        @missing_handlers.each do |handler|
+          handler.call adapter, missing_values
+        end
       end
     end
   end
