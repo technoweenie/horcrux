@@ -95,6 +95,19 @@ module Horcrux
       assert_equal 2, called
     end
 
+    def test_skips_missing_callback_on_perfect_get_all
+      called = 0
+
+      @adapter.on_missing do |adapter, values|
+        called += 1
+      end
+
+      @cache1.set_all 'a' => '1', 'b' => '2', 'c' => '3'
+
+      assert_equal %w(1 2 3), @adapter.get_all('a', 'b', 'c')
+      assert_equal 0, called
+    end
+
     def test_ignores_errors
       called = false
 
