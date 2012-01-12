@@ -80,9 +80,7 @@ module Horcrux
 
       call_missing_handlers(values, adapter_missing)
 
-      result = original.map { |key| values[key] }
-      result.compact!
-      result
+      original.map { |key| values[key] }
     end
 
     def key?(key)
