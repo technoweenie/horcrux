@@ -9,6 +9,7 @@ module Horcrux
     end
 
     def load(str)
+      str.force_encoding('BINARY') if str.respond_to?(:force_encoding)
       MessagePack.unpack(str)
     end
   end
