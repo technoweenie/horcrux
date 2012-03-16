@@ -3,7 +3,8 @@
 A Horcrux is a powerful object in which a Dark wizard or witch has hidden a
 fragment of his or her soul for the purpose of attaining immortality.
 
-The Horcrux ruby gem is an abstract key/value store adapter library.  
+The Horcrux ruby gem is an abstract key/value store adapter library.  This is
+currently used at GitHub to load the activity feed from memcache or MySQL.
 
 Horcrux adapters are shims around key/value systems.  They need to define at
 least these three methods:
@@ -45,11 +46,11 @@ directly. Here's what a custom MessagePack serializer might look like:
 
 ```ruby
 module MessagePackSerializer
-  def self.pack(value)
+  def self.dump(value)
     value.to_msgpack
   end
 
-  def self.unpack(str)
+  def self.load(str)
     MessagePack.unpack(str)
   end
 end
