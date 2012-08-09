@@ -1,6 +1,6 @@
 # See the README.md
 module Horcrux
-  VERSION = "0.1.0"
+  VERSION = "0.1.1"
 
   # Implements the optional methods of a Horcrux adapter.
   module Methods
