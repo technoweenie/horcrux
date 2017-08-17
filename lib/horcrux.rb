@@ -1,6 +1,6 @@
 # See the README.md
 module Horcrux
-  VERSION = "0.1.1"
+  VERSION = "0.1.2"
 
   # Implements the optional methods of a Horcrux adapter.
   module Methods
@@ -91,8 +91,8 @@ module Horcrux
 
     # Public: Transforms the given application key to the internal key that
     # the storage system uses.
-    # 
-    # key - The String key. 
+    #
+    # key - The String key.
     #
     # Returns the String internal key for the adapter.
     def key_for(key)
@@ -172,4 +172,3 @@ module Horcrux
     end
   end
 end
-
