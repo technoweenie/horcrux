@@ -7,3 +7,6 @@ group :dev do
   gem 'msgpack'
 end
 
+group :test do
+  gem 'test-unit'
+end

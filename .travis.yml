@@ -1,0 +1,13 @@
+language: ruby
+
+rvm:
+  - 2.2
+  - 2.3.3
+  - 2.4.1
+
+bundler_args: --without development
+
+sudo: false
+
+notifications:
+  email: false
