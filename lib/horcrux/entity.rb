@@ -63,7 +63,7 @@ module Horcrux
 
           define_method "#{key_s}=" do |value|
             instance_variable_set ivar_key, case value
-              when Fixnum  then value > 0
+              when Integer then value > 0
               when /t|f/i  then value =~ /t/i ? true : false
               else !!value
             end
